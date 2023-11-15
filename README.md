@@ -1,15 +1,9 @@
-# Elysia with Bun runtime
+# Rally API
 
-## Getting Started
-To get started with this template, simply paste this command into your terminal:
-```bash
-bun create elysia ./elysia-example
+## Variable Environment
 ```
-
-## Development
-To start the development server run:
-```bash
-bun run dev
+PORT=3000 # defualt
+JWT_SECRET_KEY="secret" # change me 
+JWT_EXPIRES_IN="1d"
+MONGO_URI="mongodb+srv://[username:password@]host[/[defaultauthdb][?options]]"
 ```
-
-Open http://localhost:3000/ with your browser to see the result.
