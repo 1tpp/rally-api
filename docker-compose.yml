@@ -1,13 +1,23 @@
 version: '3.9'
 
 services:
-  app:
-    image: "oven/bun"
-    # override default entrypoint allows us to do `bun install` before serving
-    entrypoint: []
-    # execute bun install before we start the dev server in watch mode
-    command: "/bin/sh -c 'bun install && bun run --watch src/index.ts'"
-    # expose the right ports
-    ports: ["3000:3000"]
-    # setup a host mounted volume to sync changes to the container
-    volumes: ["./:/home/bun/app"]
+  api:
+    container_name: "rally-api"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - PORT
+      - JWT_SECRET_KEY
+      - JWT_EXPIRES_IN
+      - MONGO_URI
+    restart: always
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - web-proxy 
+
+networks:   
+    web-proxy:
+        external: true
+        name: reverse-proxy
