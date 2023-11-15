@@ -5,11 +5,15 @@ import { Elysia, t } from 'elysia'
 import { swagger } from '@elysiajs/swagger'
 import { jwt } from '@elysiajs/jwt'
 import { bearer } from '@elysiajs/bearer'
+import { cors } from '@elysiajs/cors'
 
 import { User } from './schemas/user.schema'
 
 await mongoose.connect(config.mongoUri).then(() => {
   const app = new Elysia()
+    .use(cors({
+      origin: /\*.1tpp.dev$/
+    }))
     .use(swagger({
       path: '/docs',
       documentation: {
