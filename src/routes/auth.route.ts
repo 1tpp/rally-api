@@ -45,82 +45,82 @@ export const authRoute = new Elysia()
           tags: ['authentication'],
         }),
       })
-  })
-  .post('/sign-in', async ({ body, set, jwt }) => {
-    try {
-      const userExists = await User.findOne({
-        email: body.email
-      }).select('+password')
+      .post('/sign-in', async ({ body, set, jwt }) => {
+        try {
+          const userExists = await User.findOne({
+            email: body.email
+          }).select('+password')
 
-      if (!userExists) {
-        throw new Error('User not found')
-      }
+          if (!userExists) {
+            throw new Error('User not found')
+          }
 
-      const passwordMatch = await Bun.password.verify(body.password, userExists.password)
-      if (!passwordMatch) {
-        throw new Error('Password is incorrect')
-      }
-      const token = await jwt.sign({
-        sub: userExists._id.toString(),
-        role: userExists.role,
+          const passwordMatch = await Bun.password.verify(body.password, userExists.password)
+          if (!passwordMatch) {
+            throw new Error('Password is incorrect')
+          }
+          const token = await jwt.sign({
+            sub: userExists._id.toString(),
+            role: userExists.role,
+          })
+          set.headers['Authorization'] = `Bearer ${token}`
+
+          return {
+            message: 'Sign in successfully'
+          }
+        } catch (err) {
+          throw err
+        }
+      }, {
+        body: 'auth.sign-in',
+        detail: {
+          summary: 'Sign in',
+          tags: ['authentication'],
+        }
       })
-      set.headers['Authorization'] = `Bearer ${token}`
+      .post("/sign-up", async ({ body, set, jwt }) => {
+        try {
+          const userExists = await User.findOne({
+            $or: [
+              { email: body.email },
+              { username: body.username },
+            ],
+          })
 
-      return {
-        message: 'Sign in successfully'
-      }
-    } catch (err) {
-      throw err
-    }
-  }, {
-    body: 'auth.sign-in',
-    detail: {
-      summary: 'Sign in',
-      tags: ['authentication'],
-    }
-  })
-  .post("/sign-up", async ({ body, set, jwt }) => {
-    try {
-      const userExists = await User.findOne({
-        $or: [
-          { email: body.email },
-          { username: body.username },
-        ],
+          if (userExists) {
+            throw new Error('Email or username already exists')
+          }
+
+          const newUser = new User({
+            email: body.email,
+            password: await Bun.password.hash(body.password, {
+              algorithm: 'bcrypt',
+              cost: 10,
+            }),
+            firstName: body.firstName,
+            lastName: body.lastName,
+            birthday: body.birthday,
+          })
+
+          await newUser.save()
+
+          const token = await jwt.sign({
+            sub: newUser._id.toString(),
+            role: newUser.role,
+          })
+          set.headers['Authorization'] = `Bearer ${token}`
+
+          return {
+            message: 'Sign up successfully'
+          }
+        } catch (err) {
+          throw err
+        }
+      }, {
+        body: 'auth.sign-up',
+        detail: {
+          summary: 'Sign up',
+          tags: ['authentication'],
+        }
       })
-
-      if (userExists) {
-        throw new Error('Email or username already exists')
-      }
-
-      const newUser = new User({
-        email: body.email,
-        password: await Bun.password.hash(body.password, {
-          algorithm: 'bcrypt',
-          cost: 10,
-        }),
-        firstName: body.firstName,
-        lastName: body.lastName,
-        birthday: body.birthday,
-      })
-
-      await newUser.save()
-
-      const token = await jwt.sign({
-        sub: newUser._id.toString(),
-        role: newUser.role,
-      })
-      set.headers['Authorization'] = `Bearer ${token}`
-
-      return {
-        message: 'Sign up successfully'
-      }
-    } catch (err) {
-      throw err
-    }
-  }, {
-    body: 'auth.sign-up',
-    detail: {
-      summary: 'Sign up',
-      tags: ['authentication'],
-    }
   })
