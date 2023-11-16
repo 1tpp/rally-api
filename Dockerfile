@@ -12,4 +12,4 @@ COPY tsconfig.json .
 # COPY public public
 
 ENV NODE_ENV production
-CMD ["bun", "src/index.ts"]
+CMD ["bun", "src/server.ts"]
