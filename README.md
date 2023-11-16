@@ -1,6 +1,6 @@
 # Rally API
 
-## Variable Environment
+Environment Variable 
 ```
 PORT=3000 # defualt
 JWT_SECRET_KEY="secret" # change me 
